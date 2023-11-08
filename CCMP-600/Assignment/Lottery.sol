@@ -27,9 +27,9 @@ contract Lottery {
     // It's marked as view, which means it doesn't modify the contract state, and it returns a random number as a uint
     function random() private view returns (uint) {
         // Generate a pseudo-random number based on:
-        // TODO: the current timestamp - example pls
-        // TODO: the players in array - example pls
-        // TODO: the block.coinbase? - example pls - https://ethereum.stackexchange.com/q/145609/116763 - block.coinbase (address payable): current block miner’s address
+        // timestamp - the Unix timestamp that indicates when the block was created, for example if timestamp is Tue, 07 Nov 2023 19:59:21 GMT , then the block.timestamp for that block might be 1699387161000 in Unix (link convert: https://www.epochconverter.com/)
+        // players: It represents the number of participants (elements in array)  and it's currently 10, the value of players is 10.
+        // coinbase (address payable) - This represents the address of the miner who mined the current block,  example 0x61f4069Dd5d16036971Bb67cA87533E15AF2bbd2 - https://docs.soliditylang.org/en/v0.8.19/units-and-global-variables.html#block-and-transaction-properties
         return uint(
             keccak256(
                 abi.encodePacked(block.timestamp, players, block.coinbase)
@@ -43,7 +43,10 @@ contract Lottery {
         // Ensure that there are players in the lottery before proceeding
         require(players.length > 0, "No players in the lottery");
         // Generate a random index within the range of the number of players
-        // TODO: please explain the "% players.length" as well
+        // random(): This is a function that presumably generates a random number
+        // players.length: This represents the number of players currently participating in the lottery. It gives the total count of elements in the players array.
+        // The modulo operator (%) calculates the remainder, this ensures that the result (index) will be within the range of valid indices for the players array.
+        // This is because the remainder of any number divided by players.length will always be less than players.length.
         uint index = random() % players.length;
         // Identify the winner based on the randomly selected index
         address winner = players[index];
