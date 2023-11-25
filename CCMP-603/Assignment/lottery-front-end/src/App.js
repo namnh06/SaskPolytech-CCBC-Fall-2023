@@ -47,7 +47,10 @@ class App extends React.Component {
       value: Web3.utils.toWei(this.state.value, "ether"),
     });
 
-    this.setState({ message: "You have been entered!" });
+    const players = await LotteryContract.methods.getPlayers().call();
+    const balance = await web3.eth.getBalance(LotteryContract.options.address);
+    this.setState({ players, balance, message: "You have been entered!" });
+
   };
 
   onClick = async () => {
@@ -65,28 +68,29 @@ class App extends React.Component {
     await LotteryContract.methods.pickWinner().send({
       from: accounts[0],
     });
-
-    this.setState({ message: "A winner has been picked!" });
+    const players = await LotteryContract.methods.getPlayers().call();
+    const balance = await web3.eth.getBalance(LotteryContract.options.address);
+    this.setState({ players, balance, message: "A winner has been picked! Check your wallet now!" });
   };
 
   render() {
     return (
-      <div className="container">
+      <div className="container mt-5">
         <div className="container">
-          <h1 className="h1">Lottery Contract</h1>
-          <h3 className="h3">You are login as {this.state.accountAddress}</h3>
+          <h1 className="h1">CCMP 603 - Lottery Contract</h1>
+          <h4 className="h4">You are login as {this.state.accountAddress}</h4>
           <h4 className="h4">
             This contract is managed by {this.state.manager}
           </h4>
+          <hr></hr>
         </div>
-        <hr />
         <div className="container">
           <form onSubmit={this.onSubmit}>
             <h4>Want to try your luck?</h4>
             <div >
-              <label>Amount of ether to enter</label>
-              <div class="input-group flex-nowrap">
-                <span class="input-group-text" id="addon-wrapping">ETH</span>
+              <label>Amount of ether to enter, must be equal or more than 1 ETH</label>
+              <div className="input-group flex-nowrap">
+                <span className="input-group-text" id="addon-wrapping">ETH</span>
                 <input
                   type="text"
                   placeholder="Amount of ETH"
@@ -96,18 +100,32 @@ class App extends React.Component {
                 />
               </div>
             </div>
-            <button type="button" className="btn btn-primary btn-lg mt-2">Enter</button>
+            <button className="btn btn-primary btn-lg mt-2">Enter</button>
           </form>
+          <hr></hr>
         </div>
-        <hr></hr>
         <div className="container">
-          <h4>Ready to pick a winner?</h4>
-          <button type="button" className="btn btn-success btn-lg" onClick={this.onClick}>Pick a winner!</button>
-          <hr />
-          {this.state.message ? <div><h1>{this.state.message}</h1><hr></hr></div> : ""}
-          There are currently{" "}
-          {this.state.players.length} people entered, competing to win{" "}
-          {Web3.utils.fromWei(this.state.balance, "ether")} ether!
+          {this.state.accountAddress === this.state.manager ?
+            <div>
+              <h4>Ready to pick a winner?</h4>
+              <button type="button" className="btn btn-success btn-lg" onClick={this.onClick}>Pick a winner!</button>
+              <hr />
+            </div>
+            : ""}
+
+          {this.state.message ?
+            <div>
+              <h1>{this.state.message}</h1>
+              <hr></hr>
+            </div>
+            : ""}
+          <p>There are currently {this.state.players.length} people entered, competing to win {Web3.utils.fromWei(this.state.balance, "ether")} ether!</p>
+          <p>List and index of players:</p>
+          <ol type="number">
+            {this.state.players.map((player) => (
+              <li key={player}>{player}</li>
+            ))}
+          </ol>
         </div>
       </div>
     );
