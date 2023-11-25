@@ -1,50 +1,68 @@
 import React from "react";
-import web3 from "./web3";
-// import lottery from "./lottery";
-import ContractArtifact from './lottery.json'
+import Web3 from "web3";
+import ContractArtifact from "./Lottery.json";
+
 
 class App extends React.Component {
   state = {
     manager: "",
     players: [],
     balance: "",
+    accountAddress: "",
     value: "",
     message: "",
   };
-  async componentDidMount() {
-    // const manager = await lottery.methods.manager().call();
-    const manager = await ContractArtifact.methods.manager().call();
-    // const players = await lottery.methods.getPlayers().call();
-    const players = await ContractArtifact.methods.getPlayers().call();
-    // const balance = await web3.eth.getBalance(lottery.options.address);
-    const balance = await web3.eth.getBalance(ContractArtifact.lottery.options.address);
 
-    this.setState({ manager, players, balance });
+  async componentDidMount() {
+    const contractABI = ContractArtifact.abi;
+    const networkId = await window.ethereum.request({ method: "net_version" });
+    const contractAddress = ContractArtifact.networks[networkId].address;
+
+    const web3 = new Web3(window.ethereum);
+    const LotteryContract = new web3.eth.Contract(contractABI, contractAddress);
+
+    const manager = await LotteryContract.methods.manager().call();
+    const players = await LotteryContract.methods.getPlayers().call();
+    const balance = await web3.eth.getBalance(LotteryContract.options.address);
+    const accounts = await web3.eth.getAccounts();
+    const accountAddress = accounts[0];
+    this.setState({ manager, players, balance, accountAddress });
   }
 
   onSubmit = async (event) => {
     event.preventDefault();
+    const contractABI = ContractArtifact.abi;
+    const networkId = await window.ethereum.request({ method: "net_version" });
+    const contractAddress = ContractArtifact.networks[networkId].address;
 
+    const web3 = new Web3(window.ethereum);
+    const LotteryContract = new web3.eth.Contract(contractABI, contractAddress);
     const accounts = await web3.eth.getAccounts();
 
     this.setState({ message: "Waiting on transaction success..." });
 
     // await lottery.methods.enter().send({
-    await ContractArtifact.methods.enter().send({
+    await LotteryContract.methods.enter().send({
       from: accounts[0],
-      value: web3.utils.toWei(this.state.value, "ether"),
+      value: Web3.utils.toWei(this.state.value, "ether"),
     });
 
     this.setState({ message: "You have been entered!" });
   };
 
   onClick = async () => {
+    const contractABI = ContractArtifact.abi;
+    const networkId = await window.ethereum.request({ method: "net_version" });
+    const contractAddress = ContractArtifact.networks[networkId].address;
+
+    const web3 = new Web3(window.ethereum);
+    const LotteryContract = new web3.eth.Contract(contractABI, contractAddress);
     const accounts = await web3.eth.getAccounts();
 
     this.setState({ message: "Waiting on transaction success..." });
 
     // await lottery.methods.pickWinner().send({
-    await ContractArtifact.methods.pickWinner().send({
+    await LotteryContract.methods.pickWinner().send({
       from: accounts[0],
     });
 
@@ -53,35 +71,44 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
-        <h2>Lottery Contract</h2>
-        <p>
-          This contract is managed by {this.state.manager}. There are currently{" "}
+      <div className="container">
+        <div className="container">
+          <h1 className="h1">Lottery Contract</h1>
+          <h3 className="h3">You are login as {this.state.accountAddress}</h3>
+          <h4 className="h4">
+            This contract is managed by {this.state.manager}
+          </h4>
+        </div>
+        <hr />
+        <div className="container">
+          <form onSubmit={this.onSubmit}>
+            <h4>Want to try your luck?</h4>
+            <div >
+              <label>Amount of ether to enter</label>
+              <div class="input-group flex-nowrap">
+                <span class="input-group-text" id="addon-wrapping">ETH</span>
+                <input
+                  type="text"
+                  placeholder="Amount of ETH"
+                  className="form-control"
+                  value={this.state.value}
+                  onChange={(event) => this.setState({ value: event.target.value })}
+                />
+              </div>
+            </div>
+            <button type="button" className="btn btn-primary btn-lg mt-2">Enter</button>
+          </form>
+        </div>
+        <hr></hr>
+        <div className="container">
+          <h4>Ready to pick a winner?</h4>
+          <button type="button" className="btn btn-success btn-lg" onClick={this.onClick}>Pick a winner!</button>
+          <hr />
+          {this.state.message ? <div><h1>{this.state.message}</h1><hr></hr></div> : ""}
+          There are currently{" "}
           {this.state.players.length} people entered, competing to win{" "}
-          {web3.utils.fromWei(this.state.balance, "ether")} ether!
-        </p>
-
-        <hr />
-        <form onSubmit={this.onSubmit}>
-          <h4>Want to try your luck?</h4>
-          <div>
-            <label>Amount of ether to enter</label>
-            <input
-              value={this.state.value}
-              onChange={(event) => this.setState({ value: event.target.value })}
-            />
-          </div>
-          <button>Enter</button>
-        </form>
-
-        <hr />
-
-        <h4>Ready to pick a winner?</h4>
-        <button onClick={this.onClick}>Pick a winner!</button>
-
-        <hr />
-
-        <h1>{this.state.message}</h1>
+          {Web3.utils.fromWei(this.state.balance, "ether")} ether!
+        </div>
       </div>
     );
   }
