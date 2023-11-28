@@ -41,7 +41,6 @@ class App extends React.Component {
 
     this.setState({ message: "Waiting on transaction success..." });
 
-    // await lottery.methods.enter().send({
     await LotteryContract.methods.enter().send({
       from: accounts[0],
       value: Web3.utils.toWei(this.state.value, "ether"),
@@ -64,7 +63,6 @@ class App extends React.Component {
 
     this.setState({ message: "Waiting on transaction success..." });
 
-    // await lottery.methods.pickWinner().send({
     await LotteryContract.methods.pickWinner().send({
       from: accounts[0],
     });
@@ -131,4 +129,5 @@ class App extends React.Component {
     );
   }
 }
+
 export default App;
