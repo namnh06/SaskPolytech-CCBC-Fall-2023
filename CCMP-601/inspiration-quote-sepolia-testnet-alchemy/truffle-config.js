@@ -56,7 +56,9 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-
+  dashboard: {
+    port: 24012
+  },
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
@@ -89,8 +91,8 @@ module.exports = {
     //   timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
     //   skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     // },
-    goerli: {
-      provider: () => new HDWalletProvider(MNEMONIC, `https://sepolia.infura.io/v3/${PROJECT_ID}`),
+    sepolia: {
+      provider: () => new HDWalletProvider(MNEMONIC, `https://eth-sepolia.g.alchemy.com/v2/${PROJECT_ID}`),
       network_id: 11155111, // Sepolia's network ID
       gas: 4000000, // Adjust the gas limit as per your requirements
       gasPrice: 10000000000, // Set the gas price to an appropriate value
